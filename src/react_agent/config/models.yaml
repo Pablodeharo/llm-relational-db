@@ -1,0 +1,16 @@
+models:
+  sqlcoder-small:
+    repo: "defog/sqlcoder-7b-2"
+    backends:
+      - transformers-4bit  # GPU con cuantización
+      - llamacpp          # CPU con GGUF
+    default_backend: llamacpp
+    gguf_path: "./models/sqlcoder-7b-q4.gguf"
+    memory_required:
+      transformers-4bit: 4GB_VRAM
+      llamacpp: 4GB_RAM
+    
+  llama-tiny:
+    repo: "meta-llama/Llama-3.2-1B-Instruct"
+    backends: [transformers-8bit, llamacpp]
+    default_backend: transformers-8bit

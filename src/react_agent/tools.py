@@ -32,3 +32,4 @@ def query_postgres(sql: str) -> str:
 
 # REQUIRED: LangGraph imports this symbol
 TOOLS = [query_postgres]
+

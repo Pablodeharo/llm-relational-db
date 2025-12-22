@@ -1,0 +1,32 @@
+
+"""
+backends/__init__.py
+
+Backend package initialization.
+Exports main classes for easy imports.
+"""
+
+from .base import (
+    ModelBackend,
+    GenerationConfig,
+    ModelResponse,
+    ModelInfo,
+    ToolCall
+)
+
+from .transformers import TransformersBackend
+from .llamacpp import LlamaCppBackend
+
+# Import utilities
+from . import utils
+
+__all__ = [
+    "ModelBackend",
+    "GenerationConfig",
+    "ModelResponse",
+    "ModelInfo",
+    "ToolCall",
+    "TransformersBackend",
+    "LlamaCppBackend",
+    "utils",
+]
