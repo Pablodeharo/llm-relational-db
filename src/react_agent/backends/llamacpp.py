@@ -41,7 +41,10 @@ class LlamaCppBackend(ModelBackend):
                 "Install: pip install llama-cpp-python"
             )
         
-        self.model_path = model_config.get("gguf_path")
+        self.model_path = model_config.get("model_path")
+        if not self.model_path:
+            raise ValueError(f"'model_path' not specified for {self.model_name}")
+            
         self.n_ctx = model_config.get("context_length", 4096)
         self.n_threads = model_config.get("n_threads", os.cpu_count() or 4)
         self.n_gpu_layers = model_config.get("n_gpu_layers", 0)
@@ -72,8 +75,8 @@ class LlamaCppBackend(ModelBackend):
                 n_threads=self.n_threads,
                 n_gpu_layers=self.n_gpu_layers,
                 verbose=False,
-                n_batch=512,  # Batch size for prompt processing
-                use_mlock=True,  # Keep model in RAM (no swap)
+                n_batch=512,
+                use_mlock=True,
             )
             return model
         

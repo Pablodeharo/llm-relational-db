@@ -1,6 +1,6 @@
 models:
   sqlcoder:
-    type: llama_cpp
+    type: llamacpp
     model_path: /home/pablo/models/sqlcoder-7b/sqlcoder-7b-q5_k_m.gguf
     context_length: 4096
     n_gpu_layers: 0
@@ -9,7 +9,7 @@ models:
     top_p: 0.95
 
   mistral:
-    type: llama_cpp
+    type: llamacpp
     model_path: /home/pablo/models/mistral-7b-instruct-v0.2.Q4_K_M.gguf
     context_length: 8192
     n_gpu_layers: 35
