@@ -92,14 +92,6 @@ Tools are designed for **read-only safe operations** and support PostgreSQL.
 
 Setup
 
-git clone https://github.com/Pablodeharo/llm-relational-db.git
-cd llm-relational-db
-
-
-python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
-
-
 pip install -r requirements_demo.txt
 
 ---
@@ -110,6 +102,13 @@ Configuration
 Configure your database connection in environment variables:
 
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+DB_USER=youruser
+DB_PASSWORD=yourpassword
+DB_NAME=databasename
+DB_HOST=localhost
+DB_PORT=5432
+LANGSMITH_API_KEY=yourapikeyhere
 
 Configure models in models.yaml:
 
