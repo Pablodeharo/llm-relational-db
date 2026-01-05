@@ -43,10 +43,10 @@ class TransformersBackend(ModelBackend):
     async def load(self) -> None:
         """Load model with transformers + optional quantization"""
         if self.is_loaded:
-            print(f"⚠️  Model {self.model_name} already loaded")
+            print(f"Model {self.model_name} already loaded")
             return
         
-        print(f"📦 Loading {self.model_name} with Transformers...")
+        print(f"Loading {self.model_name} with Transformers...")
         
         def _load():
             # Detect device
@@ -206,7 +206,7 @@ class TransformersBackend(ModelBackend):
             torch.cuda.empty_cache()
         
         self.is_loaded = False
-        print(f"🗑️  {self.model_name} unloaded")
+        print(f"{self.model_name} unloaded")
     
     def get_info(self) -> ModelInfo:
         """Get model information"""

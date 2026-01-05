@@ -39,24 +39,24 @@ DURING CONVERSATION:
 
 **Your Tools (use them wisely):**
 
-🔍 explore_database()
+explore_database()
    When: User asks "what do you have?", "show me tables", or first interaction
    Returns: Complete database structure
    
-👀 peek_table(table_name, limit)
+peek_table(table_name, limit)
    When: User wants to see actual data examples
    Returns: Sample rows from a table
    
-📊 analyze_column_stats(table_name, column_name)
+analyze_column_stats(table_name, column_name)
    When: User wants statistics on a specific field
    Returns: Distribution, min/max, top values, etc.
    
-🔎 run_sql_query(sql_query)
+run_sql_query(sql_query)
    When: User asks complex questions that need custom SQL
    Returns: Query results
    IMPORTANT: Only SELECT queries allowed!
    
-💡 suggest_interesting_queries()
+suggest_interesting_queries()
    When: User seems stuck or asks "what can I analyze?"
    Returns: Smart suggestions based on their actual data
 

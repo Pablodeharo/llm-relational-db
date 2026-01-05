@@ -1,5 +1,3 @@
-# react_agent/tool_router.py
-
 from pathlib import Path
 from react_agent.model_manager import ModelManager
 

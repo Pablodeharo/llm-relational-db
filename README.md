@@ -103,12 +103,12 @@ Configure your database connection in environment variables:
 
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 
-DB_USER=youruser
-DB_PASSWORD=yourpassword
-DB_NAME=databasename
-DB_HOST=localhost
-DB_PORT=5432
-LANGSMITH_API_KEY=yourapikeyhere
+- DB_USER=youruser
+- DB_PASSWORD=yourpassword
+- DB_NAME=databasename
+- DB_HOST=localhost
+- DB_PORT=5432
+- LANGSMITH_API_KEY=yourapikeyhere
 
 Configure models in models.yaml:
 
@@ -139,6 +139,10 @@ This will start the LangGraph development server and execute the agent graph loc
 - Observe reasoning ↔ tool interactions
 
 - Debug state transitions and tool calls
+
+
+---
+
 
 Using LangSmith (Optional)
 

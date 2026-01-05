@@ -1,5 +1,6 @@
-# context.py
 """
+Context.py
+
 Runtime context for the data analyst agent.
 Defines reasoning model, tool-specific models, and system prompt.
 """

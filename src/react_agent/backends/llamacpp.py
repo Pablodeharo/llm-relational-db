@@ -15,7 +15,7 @@ try:
     LLAMACPP_AVAILABLE = True
 except ImportError:
     LLAMACPP_AVAILABLE = False
-    print("⚠️  llama-cpp-python not installed. Install: pip install llama-cpp-python")
+    print("llama-cpp-python not installed. Install: pip install llama-cpp-python")
 
 from .base import (
     ModelBackend,
@@ -53,7 +53,7 @@ class LlamaCppBackend(ModelBackend):
     async def load(self) -> None:
         """Load GGUF model with llama.cpp"""
         if self.is_loaded:
-            print(f"⚠️  Model {self.model_name} already loaded")
+            print(f"Model {self.model_name} already loaded")
             return
         
         if not os.path.exists(self.model_path):
@@ -62,7 +62,7 @@ class LlamaCppBackend(ModelBackend):
                 f"Download it or check the path in config."
             )
         
-        print(f"📦 Loading {self.model_name} with llama.cpp...")
+        print(f"  Loading {self.model_name} with llama.cpp...")
         print(f"  Path: {self.model_path}")
         print(f"  Context: {self.n_ctx} tokens")
         print(f"  Threads: {self.n_threads}")
