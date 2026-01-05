@@ -1,0 +1,25 @@
+# Core agent & graph
+langchain==1.2.0
+langchain-core==1.2.1
+langchain-community==0.0.20
+
+langgraph==1.0.5
+langgraph-checkpoint==3.0.1
+langgraph-runtime-inmem==0.20.1
+
+# Configuration & validation
+pydantic==2.12.5
+python-dotenv==1.2.1
+PyYAML==6.0.3
+
+# Database tools
+SQLAlchemy==2.0.45
+psycopg2-binary==2.9.11
+
+# HTTP & utilities
+requests==2.32.5
+rich==14.2.0
+tqdm==4.67.1
+
+# CPU LLM backend (default)
+llama-cpp-python==0.3.16

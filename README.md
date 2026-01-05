@@ -90,58 +90,74 @@ Tools are designed for **read-only safe operations** and support PostgreSQL.
 
 ---
 
-## Graph Architecture (LangGraph)
+Setup
 
-The conversation flow is implemented as a **StateGraph**:
+git clone https://github.com/Pablodeharo/llm-relational-db.git
+cd llm-relational-db
 
-- **Nodes**:
-  - `call_model`: Executes the reasoning model (`mistral`)
-  - `tools`: Executes tools via ToolRouter
-- **Edges**:
-  - `__start__ → call_model`
-  - Conditional routing based on tool calls:
-    - `call_model → tools` if tool calls exist
-    - `call_model → __end__` if no tool calls
-  - `tools → call_model` for iterative reasoning
-- **Routing function**: `route_model_output(state)` checks for tool calls in the last AIMessage.
 
-This allows the agent to **loop naturally between reasoning and tool execution**.
+python -m venv venv
+source venv/bin/activate # Windows: venv\Scripts\activate
+
+
+pip install -r requirements_demo.txt
 
 ---
 
-## Backend Stack
 
-- **Python 3.11**
-- **LangGraph**: State machine orchestration for nodes and edges
-- **LangChain Core**: AIMessage objects and messaging
-- **SQLAlchemy**: PostgreSQL database interaction
-- **llama_cpp**: Reasoning and SQL model backend
-- **Asyncio**: Non-blocking model calls and tool execution
+Configuration
 
----
+Configure your database connection in environment variables:
 
-## Example Flow
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 
-User: "Show me the top customers in my database."
+Configure models in models.yaml:
 
-1. **Reasoning model (`mistral`)** decides to call `query_postgres()`.
-2. **ToolRouter** selects `sqlcoder` to execute the query.
-3. SQL query executed safely on PostgreSQL.
-4. Results returned to `mistral` for interpretation.
-5. Agent responds with formatted, user-friendly output and suggested next steps.
+- Model paths
+
+- Backend type
+
+- Context length
+
+- Quantization
 
 ---
 
-## Key Features
+Running the Agent
 
-- **Safe database operations**: Only SELECT queries allowed.
-- **Iterative reasoning**: Loops between reasoning and tools for context-aware answers.
-- **Pluggable models**: Easily add new reasoning or tool models.
-- **ToolRouter abstraction**: Dynamically routes tool calls to the correct model.
-- **Async execution**: Efficient handling of multiple requests and tool calls.
-- **Extensible architecture**: Add new tools, backends, or models with minimal changes.
+Once installed and configured, the agent can be started using LangGraph's development runtime.
 
----
+Using LangGraph Dev
 
-This agent is designed for **research, development, and backend deployment**, providing a strong foundation for **AI-assisted data exploration**.
+Ensure you have your environment variables configured (including database access and model paths), then run:
+
+langgraph dev
+
+This will start the LangGraph development server and execute the agent graph locally, allowing you to:
+
+- Inspect graph execution step by step
+
+- Observe reasoning ↔ tool interactions
+
+- Debug state transitions and tool calls
+
+Using LangSmith (Optional)
+
+For observability and tracing, you can enable LangSmith:
+
+1. Add your API key to .env:
+
+LANGSMITH_API_KEY=your_api_key_here
+
+2. Run the agent as usual
+
+LangSmith will automatically capture:
+
+- Model inputs and outputs
+
+- Tool calls and results
+
+- Graph execution traces
+
+This is especially useful for debugging, evaluation, and iterative improvement of the agent.
 
