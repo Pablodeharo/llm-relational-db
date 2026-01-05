@@ -18,7 +18,7 @@ from pathlib import Path
 
 # Decide si un modelo cabe en GPU
 # Seleccionar backend (transformers vs llamacpp)
-# Automatizar eleccion de modelo en ModelManager
+# Automatizar eleccion
 
 def estimate_model_memory(
     model_size_b: float,
