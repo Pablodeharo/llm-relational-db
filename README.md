@@ -22,6 +22,8 @@ The agent is built around the **ReAct (Reason + Act)** paradigm:
 
 The execution flow is implemented as a **cyclical state machine** using **LangGraph**, making it extensible and backend-friendly.
 
+<p align="center"> <img src="assets/Captura%20desde%202026-01-03%2017-13-42.png" width="800"/> </p> <p align="center"> <img src="assets/Captura%20desde%202026-01-03%2017-14-26.png" width="800"/> </p>
+
 ---
 
 ## Agent Workflow
@@ -38,6 +40,8 @@ The execution flow is implemented as a **cyclical state machine** using **LangGr
 6. Conversation continues until a **final answer** is produced.
 
 This design ensures **context-aware reasoning**, **safe execution**, and **iterative exploration** of data.
+
+<p align="center"> <img src="docs/diagrams/ReactAgent.png" width="900"/> </p>
 
 ---
 
