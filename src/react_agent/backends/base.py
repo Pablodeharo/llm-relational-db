@@ -18,7 +18,7 @@ class GenerationConfig:
     top_p: float = 0.9
     top_k: int = 50
     stop_sequences: List[str] = None
-    stream: bool = False
+    stream: bool = True
     
     def __post_init__(self):
         if self.stop_sequences is None:

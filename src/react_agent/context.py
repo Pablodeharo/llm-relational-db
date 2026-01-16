@@ -7,6 +7,7 @@ Defines reasoning model, tool-specific models, and system prompt.
 
 from dataclasses import dataclass, field
 from react_agent.prompts import get_prompt
+from typing import Optional, Dict, Any
 
 @dataclass(kw_only=True)
 class Context:
@@ -23,8 +24,6 @@ class Context:
     
     tool_models: dict = field(default_factory=lambda: {
         "query_postgres": "sqlcoder",
-        "peek_table": "sqlcoder",
-        "analyze_column_stats": "sqlcoder",
         "explore_database": "sqlcoder",
         "suggest_interesting_queries": "sqlcoder",
         # future tools: "web_search": "tavily"
@@ -33,6 +32,8 @@ class Context:
     system_prompt: str = field(
         default_factory=lambda: get_prompt("analyst")
     )
+
+    db_schema: Optional[Dict[str, Any]] = None
     
     def __post_init__(self):
         if not self.reasoning_model:
