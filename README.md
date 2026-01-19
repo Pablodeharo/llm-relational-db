@@ -10,15 +10,20 @@ The project follows a **backend-first, production-minded architecture**, with cl
 
 ---
 
-## Overview
+## Architecture Overview
 
-The agent is built around the **ReAct (Reason + Act)** paradigm:
+The agent is built around the **ReAct (Reason + Act)** paradigm using a cyclical state machine:
 
-- The **reasoning model** (`mistral`) interprets user queries and decides the next action.
-- Determines whether an external action (tool) is required.
-- Executes the corresponding **tool** via the **ToolRouter**.
-- Observes results and continues reasoning.
-- Produces a final, user-friendly response.
+1. Init_schema: Loads database schema once and stores it in structerd memory
+2. infer_intent: Determines user intent from the last message;
+   -  Schema question -> Schema_answer
+   -  SQL queries -> sql
+   -  other queries -> call_model
+3. Schema_answer: answers questions using only the cached schema memory
+4. SQL: Generates Select-only SQL with sqlcoder and executes it via query_postgres.
+5. Call_model: Handles reasoning, explanations, or other free-form queries
+
+<p align="center"> <img src="assets/Captura desde 2026-01-19 14-43-06.png" width="800"/> </p> 
 
 The execution flow is implemented as a **cyclical state machine** using **LangGraph**, making it extensible and backend-friendly.
 
@@ -26,20 +31,25 @@ The execution flow is implemented as a **cyclical state machine** using **LangGr
 
 ## Agent Workflow
 
-1. User sends a **natural language query**.
-2. The **reasoning model** decides:
-   - Answer directly, or
-   - Call a tool (e.g., SQL query, database exploration, or other tools)
-3. **ToolRouter** selects the appropriate model for the tool:
-   - SQL tools → `sqlcoder`
-   - Other tools (or reasoning-heavy tasks) → `mistral`
-4. Tool executes and returns results.
-5. Reasoning model interprets results and decides next steps.
-6. Conversation continues until a **final answer** is produced.
+1. User sends a natural language query.
+2. Infer_intent analyzes the message and sets state.intent:
+   - Schema-only -> schema_answer
+   - SQL query -> sql
+   - Other -> call_model
+3. ToolRouter executes the selected tool:
+   - Database exploration -> explore database()
+   - SQL query execution -> query_postgres(sql)
+4. Results are observed by the agent and appended to the conversation
+5. Ctcle repeats if reasoning is needed until a final response is produced
 
-This design ensures **context-aware reasoning**, **safe execution**, and **iterative exploration** of data.
+This ensures:
+- Safe SQL execution (SELECT-only queries)
+- Contect-aware reasoning
+- Iterative exploration
 
 ---
+
+<p align="center"> <img src="assets/Captura%20desde%202026-01-03%2017-13-42.png" width="800"/> </p> <p align="center"> <img src="assets/Captura%20desde%202026-01-03%2017-14-26.png" width="800"/> </p>
 
 ## Models and Backend
 

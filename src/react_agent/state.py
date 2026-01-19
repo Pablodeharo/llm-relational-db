@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Sequence, Optional, Literal
 
 from langchain_core.messages import AnyMessage
 from langgraph.graph import add_messages
 from langgraph.managed import IsLastStep
 from typing_extensions import Annotated
+
+
 
 
 @dataclass
@@ -46,6 +48,12 @@ class State(InputState):
     """
 
     is_last_step: IsLastStep = field(default=False)
+
+    # Structered memory
+    schema: Optional["SchemaMemory"] = None
+    intent: Optional["IntentMemory"] = None
+
+  
     """
     Indicates whether the current step is the last one before the graph raises an error.
 
@@ -58,3 +66,29 @@ class State(InputState):
     # retrieved_documents: List[Document] = field(default_factory=list)
     # extracted_entities: Dict[str, Any] = field(default_factory=dict)
     # api_connections: Dict[str, Any] = field(default_factory=dict)
+
+
+
+"""
+Schema memory structues
+"""
+@dataclass
+class TableSchema:
+    name: str
+    columns: list[str]
+    column_count: int
+    used: bool = False
+    focused: bool = False
+    last_used_step: int | None = None
+
+@dataclass
+class SchemaMemory:
+    loaded: bool
+    table_count: int
+    public_only: bool
+    tables: dict[str, TableSchema]
+
+@dataclass
+class IntentMemory:
+    type: Literal["shema", "sql", "analysis", "unknown"]
+    confidence: float = 1.0
