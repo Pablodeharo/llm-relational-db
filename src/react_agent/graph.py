@@ -19,11 +19,13 @@ async def init_schema(state: State, runtime: Runtime[Context]):
     """
     Load database schema once and store it in structured SchemaMemory.
     """
-    if state.schema is None:
+    if state.db_schema is None:
         tool_router = ToolRouter(runtime)
         raw_schema = await tool_router.execute_tool("explore_database")
-        state.schema = build_schema_memory(raw_schema)
-
+        schema_memory = build_schema_memory(raw_schema)
+        
+        return {"db_schema": schema_memory}
+    
     return {}
 
 
@@ -53,36 +55,36 @@ def infer_intent(state: State):
     ]
 
     if any(k in text for k in schema_keywords):
-        state.intent = IntentMemory(type="schema", confidence=0.9)
+        intent_obj = IntentMemory(type="schema")
     elif any(k in text for k in sql_keywords):
-        state.intent = IntentMemory(type="sql", confidence=0.9)
+        intent_obj = IntentMemory(type="sql")
     elif any(k in text for k in analysis_keywords):
-        state.intent = IntentMemory(type="analysis", confidence=0.7)
+        intent_obj = IntentMemory(type="analysis",)
     else:
-        state.intent = IntentMemory(type="unknown", confidence=0.3)
+        intent_obj = IntentMemory(type="unknown")
 
-    return {}
+    return {"intent": intent_obj}
 
 
 async def answer_from_schema(state: State, runtime: Runtime[Context]):
     """
     Answer questions that can be resolved using SchemaMemory only.
     """
-    schema = state.schema
+    schema = state.db_schema
     question = get_message_text(state.messages[-1]).lower()
 
-    if not schema or not schema.loaded:
+    if schema is None or not schema.loaded:
         return {
-            "messages": state.messages + [
+            "messages": [
                 AIMessage(content="Database schema has not been loaded yet.")
             ]
         }
 
     if "cuantas tablas" in question or "how many tables" in question:
         return {
-            "messages": state.messages + [
+            "messages": [
                 AIMessage(
-                    content=f"The database contains {schema.table_count} public tables."
+                    content=f"La base de datos contiene {schema.table_count} tablas públicas."
                 )
             ]
         }
@@ -91,21 +93,22 @@ async def answer_from_schema(state: State, runtime: Runtime[Context]):
         if table_name.lower() in question:
             cols = ", ".join(table.columns)
             return {
-                "messages": state.messages + [
+                "messages": [
                     AIMessage(
-                        content=f"The table `{table_name}` has the following columns: {cols}"
+                        content=f"La tabla `{table_name}` tiene las siguientes columnas: {cols}"
                     )
                 ]
             }
-
+    # Fallback all tables
     table_names = ", ".join(schema.tables.keys())
     return {
-        "messages": state.messages + [
+        "messages": [
             AIMessage(
-                content=f"Available tables are: {table_names}"
+                content=f"Las tablas disponibles son: {table_names}"
             )
         ]
     }
+
 
 async def call_model(state: State, runtime: Runtime[Context]):
     """
@@ -133,28 +136,38 @@ async def call_model(state: State, runtime: Runtime[Context]):
     )
 
     return {
-        "messages": state.messages + [AIMessage(content=response.content)]
+        "messages": [AIMessage(content=response.content)]
     }
-
 
 async def generate_sql(sql_request: str, schema_memory) -> str:
     """
-    Generate SELECT-only SQL using SQLCoder and compact schema.
+    Generate SELECT-only SQL using SQLCoder and compact schema with relationships.
     """
     model_manager = ModelManager(
         config_path=Path(__file__).parent / "config" / "models.yaml"
     )
     sql_model = await model_manager.get_backend("sqlcoder")
 
+    # Incluir tablas
     schema_json = {
         "tables": {
             name: table.columns
             for name, table in schema_memory.tables.items()
         }
     }
+    
+    # Incluir relaciones
+    relationships_json = [
+        {
+            "from": f"{rel.from_table}.{rel.from_column}",
+            "to": f"{rel.to_table}.{rel.to_column}"
+        }
+        for rel in schema_memory.relationships
+    ]
 
     prompt = SQLCODER_PROMPT.format(
-        schema=json.dumps(schema_json),
+        schema=json.dumps(schema_json, indent=2),
+        relationships=json.dumps(relationships_json, indent=2),
         task=sql_request
     )
 
@@ -173,7 +186,7 @@ async def run_sql(state: State, runtime: Runtime[Context]):
     tool_router = ToolRouter(runtime)
     sql = await generate_sql(
         get_message_text(state.messages[-1]),
-        state.schema
+        state.db_schema
     )
 
     result = await tool_router.execute_tool(
@@ -182,7 +195,7 @@ async def run_sql(state: State, runtime: Runtime[Context]):
     )
 
     return {
-        "messages": state.messages + [
+        "messages": [
             ToolMessage(
                 name="query_postgres",
                 content=str(result),
@@ -191,9 +204,14 @@ async def run_sql(state: State, runtime: Runtime[Context]):
         ]
     }
 
+
 def route_by_intent(state: State) -> Literal[
     "schema_answer", "sql", "call_model"
 ]:
+
+    if state.intent is None:
+        return "call_model"
+    
     intent = state.intent.type
 
     if intent == "schema":

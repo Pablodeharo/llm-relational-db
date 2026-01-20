@@ -10,7 +10,40 @@ from langgraph.graph import add_messages
 from langgraph.managed import IsLastStep
 from typing_extensions import Annotated
 
+"""
+Schema memory structues
+"""
 
+@dataclass
+class TableRelationship:
+    """Representa una foreign key entre tablas"""
+    from_table: str
+    from_column: str
+    to_table: str
+    to_column: str
+    constraint_name: str
+
+@dataclass
+class TableSchema:
+    name: str
+    columns: list[str]
+    column_count: int
+    used: bool = False
+    focused: bool = False
+    last_used_step: int | None = None
+
+@dataclass
+class SchemaMemory:
+    loaded: bool
+    table_count: int
+    public_only: bool
+    tables: dict[str, TableSchema]
+    relationships: list[TableRelationship] = field(default_factory=list)
+
+@dataclass
+class IntentMemory:
+    type: Literal["schema", "sql", "analysis", "unknown"]
+    confidence: float = 1.0
 
 
 @dataclass
@@ -50,7 +83,7 @@ class State(InputState):
     is_last_step: IsLastStep = field(default=False)
 
     # Structered memory
-    schema: Optional["SchemaMemory"] = None
+    db_schema: Optional["SchemaMemory"] = None
     intent: Optional["IntentMemory"] = None
 
   
@@ -69,26 +102,3 @@ class State(InputState):
 
 
 
-"""
-Schema memory structues
-"""
-@dataclass
-class TableSchema:
-    name: str
-    columns: list[str]
-    column_count: int
-    used: bool = False
-    focused: bool = False
-    last_used_step: int | None = None
-
-@dataclass
-class SchemaMemory:
-    loaded: bool
-    table_count: int
-    public_only: bool
-    tables: dict[str, TableSchema]
-
-@dataclass
-class IntentMemory:
-    type: Literal["shema", "sql", "analysis", "unknown"]
-    confidence: float = 1.0

@@ -22,13 +22,15 @@ def _is_safe_query(sql: str) -> bool:
 @tool
 def explore_database() -> str:
     """
-    Discover the database schema (tables and columns only).
+    Discover the database schema (tables, columns, and relationships).
     Returns a compact JSON suitable for reasoning by the agent.
     """
     db = SessionLocal()
     try:
         tables_dict = {}
+        relationships = []
 
+        # Obtener tablas
         tables_result = db.execute(text("""
             SELECT table_name
             FROM information_schema.tables
@@ -38,6 +40,7 @@ def explore_database() -> str:
 
         tables = [row[0] for row in tables_result]
 
+        # Obtener columnas por tabla
         for table_name in tables:
             columns_result = db.execute(text("""
                 SELECT column_name
@@ -48,9 +51,39 @@ def explore_database() -> str:
 
             tables_dict[table_name] = [row[0] for row in columns_result]
 
+        # Obtener relaciones (foreign keys)
+        fk_result = db.execute(text("""
+            SELECT
+                tc.table_name AS from_table,
+                kcu.column_name AS from_column,
+                ccu.table_name AS to_table,
+                ccu.column_name AS to_column,
+                tc.constraint_name
+            FROM information_schema.table_constraints AS tc
+            JOIN information_schema.key_column_usage AS kcu
+                ON tc.constraint_name = kcu.constraint_name
+                AND tc.table_schema = kcu.table_schema
+            JOIN information_schema.constraint_column_usage AS ccu
+                ON ccu.constraint_name = tc.constraint_name
+                AND ccu.table_schema = tc.table_schema
+            WHERE tc.constraint_type = 'FOREIGN KEY'
+                AND tc.table_schema = 'public'
+            ORDER BY tc.table_name, kcu.column_name;
+        """))
+
+        for row in fk_result:
+            relationships.append({
+                "from_table": row[0],
+                "from_column": row[1],
+                "to_table": row[2],
+                "to_column": row[3],
+                "constraint_name": row[4]
+            })
+
         schema = {
             "table_count": len(tables_dict),
-            "tables": tables_dict
+            "tables": tables_dict,
+            "relationships": relationships
         }
 
         return json.dumps(schema, indent=2)
